@@ -1,0 +1,8 @@
+External QA filtering enabled
+  QA TSV: data/qa/quality_report.tsv
+  ID column: Name
+  completeness column: Completeness
+  contamination column: Contamination
+  min completeness: 50.0
+  max contamination: 10.0
+Summary: 1/2 FAA files passed external QA.

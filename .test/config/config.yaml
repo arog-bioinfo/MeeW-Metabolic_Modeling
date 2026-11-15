@@ -1,0 +1,59 @@
+input:
+  faa_globs:
+    - data/mags/*.faa
+  faa_dir: ""
+
+sample: test_sample
+
+solver: scip
+media: M9
+
+cplex:
+  studio_dir: ""
+  auto_upgrade: true
+
+execution:
+  mock: true
+
+qa:
+  enabled: true
+  tsv: data/qa/quality_report.tsv
+  columns:
+    id: Name
+    completeness: Completeness
+    contamination: Contamination
+  min_completeness: 50.0
+  max_contamination: 10.0
+
+checkm2:
+  enabled: false
+  database_path: "resources/checkm2_db"
+  download_database: false
+  threads: 2
+  extension: faa
+  extra: ""
+
+memote:
+  min_total_score: 0.4
+
+community:
+  enabled: true
+  tools:
+    smetana: true
+    micom: true
+    steadycom: true
+
+simulation_medium:
+  source: discover
+  aggregation: sum
+  predefined_medium: M9
+  min_growth: 0.1
+  open_exchanges: true
+  exchange_bound: 1000
+
+micom:
+  # Empty keeps standalone equal-abundance behavior.
+  abundance_tsv: ""
+
+steadycom:
+  objective: community_growth

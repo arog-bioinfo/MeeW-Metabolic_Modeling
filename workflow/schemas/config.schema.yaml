@@ -1,0 +1,285 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+type: object
+description: Configuration for MeeW Metabolic Modeling.
+properties:
+  input:
+    type: object
+    properties:
+      faa_samples:
+        type: string
+        description: Optional FAA sample TSV path with required mag/path and optional per-MAG universe (bacteria or archaea); blank or absent universe cells default to bacteria. ~ and environment variables are expanded.
+      faa_globs:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+        description: FAA glob or globs; relative patterns use the Snakemake working directory.
+      faa_dir:
+        type: string
+      bakta_dir:
+        type: string
+      bakta_done:
+        type: string
+    additionalProperties: false
+  sample:
+    type: string
+  resources_root:
+    type: string
+    default: ""
+    description: Optional module resource root for automatic CheckM2 path resolution. Explicit database_path wins; a nonblank root precedes CHECKM2DB. Blank preserves the existing tool, MEEW_RESOURCES, XDG_DATA_HOME/meew, and ~/.local/share/meew chain.
+  solver:
+    type: string
+    minLength: 1
+  media:
+    type: string
+  cplex:
+    type: object
+    properties:
+      studio_dir:
+        type: string
+        description: Optional explicit CPLEX Studio path; CPLEX_STUDIO_DIR is the fallback only for solver=cplex.
+      auto_upgrade:
+        type: boolean
+        default: true
+    additionalProperties: false
+  execution:
+    type: object
+    properties:
+      mock:
+        type: boolean
+        default: false
+    additionalProperties: false
+  qa:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      tsv:
+        type: string
+      columns:
+        type: object
+        properties:
+          id:
+            type: string
+          completeness:
+            type: string
+          contamination:
+            type: string
+        additionalProperties: false
+      min_completeness:
+        type: number
+      max_contamination:
+        type: number
+    additionalProperties: false
+  checkm2:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      database_path:
+        type: string
+        description: Explicit or normalized CheckM2 database path.
+      download_database:
+        type: boolean
+        default: false
+      threads:
+        type: integer
+        minimum: 1
+      extension:
+        type: string
+      extra:
+        type: string
+    additionalProperties: false
+  memote:
+    type: object
+    properties:
+      min_total_score:
+        type: number
+        minimum: 0
+        maximum: 1
+    additionalProperties: false
+  community:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+      tools:
+        type: object
+        properties:
+          smetana:
+            type: boolean
+          micom:
+            type: boolean
+          steadycom:
+            type: boolean
+        additionalProperties: false
+    additionalProperties: false
+  simulation_medium:
+    type: object
+    description: The one medium selected for native MICOM and SteadyCom simulations; SMETANA remains independent.
+    properties:
+      source:
+        type: string
+        enum: [discover, predefined]
+        default: discover
+      aggregation:
+        type: string
+        enum: [sum, max]
+        default: sum
+        description: Unweighted aggregation of complete individual recipes; used only for source=discover.
+      predefined_medium:
+        type: string
+        minLength: 1
+        default: M9
+        description: M9 selects the bundled aerobic flux-budget preset; any other value is a user CSV path expanded with normal workflow path semantics and used only for source=predefined.
+      min_growth:
+        type: number
+        exclusiveMinimum: 0
+        default: 0.1
+        description: Absolute solo-model growth required only during discovery.
+      open_exchanges:
+        type: boolean
+        default: true
+        description: Open only exchanges already present in each imported COBRA model during discovery.
+      exchange_bound:
+        type: number
+        exclusiveMinimum: 0
+        default: 1000
+        description: Symmetric discovery-only exchange opening bound.
+    required:
+      - source
+      - aggregation
+      - predefined_medium
+      - min_growth
+      - open_exchanges
+      - exchange_bound
+    additionalProperties: false
+  smetana:
+    type: object
+    description: SMETANA mode selection and optional user-supplied media database.
+    properties:
+      modes:
+        type: object
+        properties:
+          global:
+            type: boolean
+            default: true
+          detailed:
+            type: boolean
+            default: false
+        required: [global, detailed]
+        additionalProperties: false
+      media_db:
+        type: string
+        description: Optional SMETANA media TSV path; ~ and environment variables are expanded.
+        default: ""
+      media:
+        type: array
+        description: Media names selected from the medium column of media_db.
+        items:
+          type: string
+          minLength: 1
+        uniqueItems: true
+        default: []
+    required: [modes, media_db, media]
+    oneOf:
+      - properties:
+          media_db:
+            const: ""
+          media:
+            maxItems: 0
+      - properties:
+          media_db:
+            minLength: 1
+          media:
+            minItems: 1
+    additionalProperties: false
+  micom:
+    type: object
+    properties:
+      abundance_tsv:
+        type: string
+        description: Optional material TSV input for MICOM. Supports standard id/mag plus abundance tables and native CoverM 0.7 dense or sparse relative-abundance tables; retained model values are validated and normalized.
+    additionalProperties: false
+  steadycom:
+    type: object
+    properties:
+      objective:
+        type: string
+        const: community_growth
+    additionalProperties: false
+required:
+  - input
+  - solver
+allOf:
+  - if:
+      properties:
+        solver:
+          const: cplex
+      required: [solver]
+    then:
+      required: [cplex]
+  - if:
+      properties:
+        checkm2:
+          properties:
+            enabled:
+              const: true
+          required: [enabled]
+      required: [checkm2]
+    then:
+      properties:
+        checkm2:
+          required: [database_path]
+          properties:
+            database_path:
+              minLength: 1
+  - if:
+      properties:
+        qa:
+          properties:
+            enabled:
+              const: true
+            tsv:
+              const: ""
+          required: [enabled, tsv]
+      required: [qa]
+    then:
+      properties:
+        checkm2:
+          required: [database_path]
+          properties:
+            database_path:
+              minLength: 1
+  - if:
+      properties:
+        community:
+          properties:
+            enabled:
+              const: true
+            tools:
+              properties:
+                smetana:
+                  const: true
+              required: [smetana]
+          required: [enabled, tools]
+      required: [community]
+    then:
+      required: [smetana]
+      properties:
+        smetana:
+          properties:
+            modes:
+              anyOf:
+                - properties:
+                    global:
+                      const: true
+                  required: [global]
+                - properties:
+                    detailed:
+                      const: true
+                  required: [detailed]
+additionalProperties: false

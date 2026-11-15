@@ -1,0 +1,12 @@
+title = "MeeW Metabolic Modeling Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "NCBI RefSeq protein accessions in a scientific FASTA fixture"
+regexTarget = "secret"
+regexes = [
+  '''^WP_016498723\.1$''',
+  '''^WP_016499852\.1$''',
+]

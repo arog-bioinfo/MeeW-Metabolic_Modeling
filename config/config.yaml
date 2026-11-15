@@ -1,0 +1,139 @@
+# ====================
+# Workflow Input
+# ====================
+
+# --------------------
+# Protein FASTA Inputs
+# --------------------
+input:
+  # Optional TSV with required mag/path and optional universe columns. Universe
+  # values are bacteria or archaea; blank/missing defaults to bacteria.
+  faa_samples: ""
+  # Supports nested annotation outputs, e.g. ../MeeW-Annotation/results/bakta/*/*.faa
+  faa_globs:
+    - data/mags/*.faa
+  faa_dir: ""
+  # Optional Bakta batch output directory. Discovered recursively after
+  # input.bakta_done when configured; *hypothetical*.faa files are ignored.
+  bakta_dir: ""
+  bakta_done: ""
+
+# Project/sample output root used by standalone pathvars (results/{sample}).
+# MAG IDs remain separate and are represented by the {mag} wildcard.
+sample: metabolic_modeling_sample
+
+# Optional module resource root. Blank preserves the existing CHECKM2DB,
+# MEEW_RESOURCES, XDG_DATA_HOME, and ~/.local/share/meew fallback chain.
+resources_root: ""
+
+# ====================
+# Model Reconstruction
+# ====================
+
+# --------------------
+# Solver and Growth Medium
+# --------------------
+solver: cplex
+media: M9
+
+# --------------------
+# CPLEX Studio Setup
+# --------------------
+# Used only when solver is cplex. If Community Edition limits are detected,
+# scripts can run `docplex config --upgrade <studio_dir>` inside their
+# active Snakemake conda environment before launching CPLEX-backed tools.
+# CPLEX_STUDIO_DIR is used when studio_dir is empty.
+cplex:
+  studio_dir: ""
+  auto_upgrade: true
+
+# ====================
+# Execution Mode
+# ====================
+
+execution:
+  mock: false
+
+# ====================
+# Quality Filtering
+# ====================
+
+qa:
+  enabled: false
+  tsv: ""
+  columns:
+    id: Name
+    completeness: Completeness
+    contamination: Contamination
+  min_completeness: 50.0
+  max_contamination: 10.0
+
+# --------------------
+# CheckM2 First-QA Provider
+# --------------------
+# If qa.enabled is true and qa.tsv is empty, CheckM2 is run automatically
+# on discovered protein FASTA files and its quality_report.tsv is used for QA.
+checkm2:
+  enabled: false
+  database_path: ""
+  download_database: false
+  threads: 8
+  extension: faa
+  extra: ""
+
+# ====================
+# Model Quality Assessment
+# ====================
+
+memote:
+  min_total_score: 0.4
+
+# ====================
+# Community Modeling
+# ====================
+
+# --------------------
+# Community Tool Selection
+# --------------------
+community:
+  enabled: true
+  tools:
+    smetana: true
+    micom: true
+    steadycom: true
+
+# One selected medium feeds both MICOM and SteadyCom. Discovery minimizes each
+# retained model's total import at absolute growth 0.1, then aggregates the
+# complete cohort without abundance weighting. Predefined mode accepts M9 or a
+# nutrient_id,uptake CSV and performs no individual growth optimization.
+simulation_medium:
+  source: discover
+  aggregation: sum
+  predefined_medium: M9
+  min_growth: 0.1
+  open_exchanges: true
+  exchange_bound: 1000
+
+# --------------------
+# SMETANA
+# --------------------
+smetana:
+  modes:
+    global: true
+    detailed: false
+  media_db: ""
+  media: []
+
+# --------------------
+# MICOM
+# --------------------
+micom:
+  # Optional material input. Accepts id/mag + abundance or native CoverM 0.7
+  # dense/sparse relative-abundance output. Empty assigns equal abundances.
+  abundance_tsv: ""
+
+# --------------------
+# SteadyCom
+# --------------------
+steadycom:
+  objective: community_growth

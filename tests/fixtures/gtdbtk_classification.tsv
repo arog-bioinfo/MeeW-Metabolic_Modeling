@@ -1,0 +1,6 @@
+domain	user_genome	classification	extra_gtdb_column
+bacteria	EST6_prok_bin_002	d__Bacteria;p__Spirochaetota	fixture
+archaea	EST6_prok_bin_005	d__Archaea;p__Methanobacteriota	fixture
+archaea	EST6_prok_bin_010	d__Archaea;p__Halobacteriota	fixture
+	EST6_prok_bin_unknown	d__	fixture
+unknown	EST6_prok_bin_other	d__Unknown	fixture

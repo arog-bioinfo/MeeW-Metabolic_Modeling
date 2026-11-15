@@ -1,0 +1,3 @@
+mag	path	universe
+example_bacterium	data/mags/Ecoli_K12.faa	bacteria
+example_archaeon	data/mags/example_archaeon.faa	archaea

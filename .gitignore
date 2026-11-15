@@ -1,0 +1,19 @@
+results/**
+resources/**
+logs/**
+.snakemake
+.snakemake/**
+.test/results/*
+# Real-tool integration downloads and run records.
+tests/integration/fixtures/
+.test/integration/run-logs/
+workflow/notebooks/.ipynb_checkpoints/**
+**/.Rhistory
+**/*.Rproj
+**/.Rproj.user/**
+**/.RData
+**/Rplots.pdf
+# Python caches and compiled files.
+.pytest_cache/
+__pycache__/
+*.py[cod]

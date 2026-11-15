@@ -1,0 +1,6 @@
+Memote quality filter (min_total_score=0.4)
+
+  bin1: total=1.0 -> PASS
+    sections: ['consistency']
+
+Summary: 1/1 models passed

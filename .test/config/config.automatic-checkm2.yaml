@@ -1,0 +1,6 @@
+qa:
+  tsv: ""
+
+checkm2:
+  enabled: true
+  download_database: false
